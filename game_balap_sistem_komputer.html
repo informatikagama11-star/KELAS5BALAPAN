@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Balap Sistem Komputer - 50 Soal Random & Durasi Panjang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        .font-pixel { font-family: 'Press Start 2P', monospace; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #080c14; color: #f8fafc; overflow-x: hidden; user-select: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between p-2 sm:p-4">
+
+    <!-- Header & HUD Game -->
+    <header class="w-full max-w-3xl flex flex-col sm:flex-row items-center justify-between bg-slate-900/90 border border-slate-800 p-3 sm:p-4 rounded-2xl shadow-2xl mb-2 gap-3">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-cyan-500 to-blue-600 p-2.5 rounded-xl text-2xl shadow-lg">🏎️</div>
+            <div>
+                <h1 class="text-sm sm:text-base font-extrabold tracking-wide text-cyan-400 font-pixel">SPEED RACER 50</h1>
+                <p class="text-[11px] text-slate-400 font-medium">Sistem Komputer Kelas 5 SD</p>
+            </div>
+        </div>
+        <!-- Status Bar HUD -->
+        <div class="flex items-center gap-3 bg-slate-950/90 px-4 py-2 rounded-xl border border-slate-800 w-full sm:w-auto justify-around">
+            <div class="text-center">
+                <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">Skor</span>
+                <span id="scoreDisplay" class="text-base sm:text-lg font-bold text-amber-400 font-pixel">0</span>
+            </div>
+            <div class="h-6 w-[1px] bg-slate-800"></div>
+            <div class="text-center">
+                <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">Nyawa</span>
+                <span id="healthDisplay" class="text-base sm:text-lg font-bold text-red-500 font-pixel">❤️❤️❤️</span>
+            </div>
+            <div class="h-6 w-[1px] bg-slate-800"></div>
+            <div class="text-center">
+                <span class="block text-[9px] uppercase tracking-wider text-slate-400 font-bold">Pit Stop</span>
+                <span id="checkpointDisplay" class="text-base sm:text-lg font-bold text-emerald-400 font-pixel">0 / 50</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Area Utama Game Canvas -->
+    <main class="w-full max-w-3xl flex-1 flex flex-col items-center justify-center relative">
+
+        <!-- Screen 1: Start Menu -->
+        <div id="startScreen" class="w-full bg-slate-900/95 border-2 border-cyan-500/40 rounded-3xl p-6 sm:p-8 text-center shadow-2xl flex flex-col items-center gap-5 my-auto">
+            <div class="inline-block bg-cyan-500/10 text-cyan-400 px-4 py-1.5 rounded-full text-xs font-bold border border-cyan-500/30">
+                🏎️ BALAPAN DULU LAMA BANGET + 50 SOAL ACAK
+            </div>
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-pixel leading-relaxed">
+                BALAP <span class="text-cyan-400">KOMPUTER</span>
+            </h2>
+            <p class="text-slate-300 max-w-md text-xs sm:text-sm leading-relaxed">
+                Nikmati serunya balapan panjang! Hindari <span class="text-amber-400 font-bold">Tumpahan Oli 🛢️</span>, <span class="text-red-400 font-bold">Cone 🚧</span>, dan <span class="text-orange-400 font-bold">Mobil Musuh 🚘</span>. Ambil <span class="text-emerald-400 font-bold">Koin & Nitro ⚡</span>. Setelah balapan jauh, masuk ke <span class="text-cyan-400 font-bold">Pit Stop Kuis</span>!
+            </p>
+
+            <div class="grid grid-cols-2 gap-3 w-full max-w-md my-1 text-left">
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center gap-3">
+                    <span class="text-2xl">⌨️</span>
+                    <div>
+                        <div class="text-[10px] text-slate-400 font-bold">KONTROL PC</div>
+                        <div class="text-xs font-bold text-slate-200">Panah / A D / WASD</div>
+                    </div>
+                </div>
+                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex items-center gap-3">
+                    <span class="text-2xl">📱</span>
+                    <div>
+                        <div class="text-[10px] text-slate-400 font-bold">HP / TOUCH</div>
+                        <div class="text-xs font-bold text-slate-200">Tombol Layar</div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="initAndStartGame()" class="w-full max-w-md bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:scale-105 active:scale-95 text-white font-extrabold py-4 rounded-2xl shadow-xl transition transform text-base sm:text-lg font-pixel tracking-wider flex items-center justify-center gap-2 border border-cyan-300">
+                <span>▶ MULAI BALAPAN</span>
+            </button>
+        </div>
+
+        <!-- Screen 2: Canvas Gameplay & Controls -->
+        <div id="gameplayScreen" class="w-full hidden flex flex-col items-center gap-3">
+            <!-- Canvas Container -->
+            <div class="w-full bg-slate-950 border-2 border-slate-800 rounded-3xl overflow-hidden shadow-2xl relative flex justify-center">
+                <canvas id="raceCanvas" class="block bg-slate-900"></canvas>
+            </div>
+
+            <!-- On-Screen Touch Controls -->
+            <div class="w-full bg-slate-900/90 border border-slate-800 p-3 rounded-2xl flex items-center justify-between gap-2">
+                <div class="flex gap-2 w-1/2">
+                    <button id="btnLeft" class="flex-1 bg-slate-800 active:bg-blue-600 text-white font-bold py-3 rounded-xl border border-slate-700 text-xl active:scale-95 transition flex items-center justify-center">
+                        ◀ KIRI
+                    </button>
+                    <button id="btnRight" class="flex-1 bg-slate-800 active:bg-blue-600 text-white font-bold py-3 rounded-xl border border-slate-700 text-xl active:scale-95 transition flex items-center justify-center">
+                        KANAN ▶
+                    </button>
+                </div>
+                <div class="flex gap-2 w-1/2">
+                    <button id="btnBrake" class="flex-1 bg-slate-800 active:bg-red-600 text-white font-bold py-3 rounded-xl border border-slate-700 text-xs active:scale-95 transition flex items-center justify-center">
+                        🛑 REM
+                    </button>
+                    <button id="btnNitro" class="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 active:scale-95 text-white font-extrabold py-3 rounded-xl shadow-lg text-xs font-pixel flex items-center justify-center gap-1">
+                        ⚡ NITRO
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pop-up Pit Stop Checkpoint (Soal Kuis) -->
+        <div id="pitStopModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+            <div class="bg-slate-900 border-2 border-cyan-500 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl flex flex-col gap-5 animate-in fade-in zoom-in duration-200">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-cyan-500/20 text-cyan-400 p-2 rounded-xl text-xl">🚩 PIT STOP CHECKPOINT</span>
+                        <h3 class="font-bold text-base sm:text-lg text-white">Tantangan Kuis Komputer</h3>
+                    </div>
+                    <span id="quizCategory" class="text-xs bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full border border-amber-500/30 font-bold">HARDWARE</span>
+                </div>
+
+                <p id="quizQuestion" class="text-sm sm:text-base text-slate-100 font-semibold leading-relaxed">Pertanyaan kuis akan tampil di sini...</p>
+
+                <div id="quizOptions" class="grid grid-cols-1 gap-2.5">
+                    <!-- Opsi Jawaban Acak via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Hasil / Finish / Game Over -->
+        <div id="resultScreen" class="w-full hidden bg-slate-900/95 border-2 border-amber-500/50 rounded-3xl p-6 sm:p-8 text-center shadow-2xl flex flex-col items-center gap-5 my-auto">
+            <div id="finishIcon" class="text-5xl sm:text-6xl animate-bounce">🏆</div>
+            <h2 id="finishTitle" class="text-xl sm:text-3xl font-extrabold text-white font-pixel">BALAPAN SELESAI!</h2>
+            <p id="finishDesc" class="text-slate-300 text-xs sm:text-sm max-w-md">Hasil balapan dan kuis kamu sangat luar biasa!</p>
+
+            <div class="bg-slate-950 border border-slate-800 p-4 rounded-2xl w-full max-w-sm flex justify-around">
+                <div>
+                    <span class="block text-[10px] text-slate-400 uppercase font-bold">Total Skor</span>
+                    <span id="finalScore" class="text-2xl font-bold text-amber-400 font-pixel">0</span>
+                </div>
+                <div class="h-10 w-[1px] bg-slate-800"></div>
+                <div>
+                    <span class="block text-[10px] text-slate-400 uppercase font-bold">Benar / Pit Stop</span>
+                    <span id="finalCorrect" class="text-2xl font-bold text-emerald-400 font-pixel">0 / 50</span>
+                </div>
+            </div>
+
+            <button onclick="restartGame()" class="w-full max-w-sm bg-gradient-to-r from-emerald-500 to-cyan-600 hover:scale-105 active:scale-95 text-white font-extrabold py-4 rounded-2xl shadow-xl transition text-base font-pixel tracking-wider">
+                🔄 MAIN LAGI
+            </button>
+        </div>
+
+    </main>
+
+    <footer class="w-full max-w-3xl text-center text-[10px] text-slate-500 mt-2">
+        Game Edukasi Balap & Kuis • Materi Sistem Komputer Kelas 5 SD (Kurikulum Merdeka)
+    </footer>
+
+    <script>
+        // MASTER 50 SOAL LENGKAP MATERI BAB 3 SISTEM KOMPUTER (KELAS 5 SD)
+        const rawQuestionsData = [
+            { category: "Hardware", question: "Perangkat keras yang berfungsi sebagai otak utama pengolah data di komputer adalah...", options: ["CPU", "RAM", "Hard Disk", "Monitor"], correctIndex: 0 },
+            { category: "Hardware", question: "Perangkat yang digunakan untuk mengetik angka, huruf, dan simbol ke komputer adalah...", options: ["Keyboard", "Mouse", "Printer", "Scanner"], correctIndex: 0 },
+            { category: "Hardware", question: "Perangkat yang digunakan untuk menggerakkan kursor atau penunjuk di layar adalah...", options: ["Mouse", "Speaker", "Microphone", "Plotter"], correctIndex: 0 },
+            { category: "Hardware", question: "Perangkat keluaran yang menampilkan gambar, teks, dan video secara visual adalah...", options: ["Monitor", "Keyboard", "Scanner", "Webcam"], correctIndex: 0 },
+            { category: "Hardware", question: "Perangkat keras yang bertugas mencetak dokumen atau gambar ke atas kertas yaitu...", options: ["Printer", "Scanner", "Proyektor", "Joystick"], correctIndex: 0 },
+            { category: "Hardware", question: "Memori utama yang menyimpan data sementara saat komputer dihidupkan adalah...", options: ["RAM", "ROM", "Hard Disk", "Flashdisk"], correctIndex: 0 },
+            { category: "Hardware", question: "Media penyimpanan permanen berkapasitas besar di dalam komputer adalah...", options: ["Hard Disk / SSD", "RAM", "Cache", "VGA Card"], correctIndex: 0 },
+            { category: "Hardware", question: "Papan sirkuit utama tempat menghubungkan seluruh komponen komputer disebut...", options: ["Motherboard", "Power Supply", "Processor", "Sound Card"], correctIndex: 0 },
+            { category: "Hardware", question: "Kartu grafis yang mengolah visual agar tampil jernih di layar monitor adalah...", options: ["VGA Card / GPU", "Sound Card", "LAN Card", "Power Supply"], correctIndex: 0 },
+            { category: "Hardware", question: "Perangkat yang mengubah sinyal digital menjadi suara pada speaker atau headphone adalah...", options: ["Sound Card", "VGA Card", "Processor", "RAM"], correctIndex: 0 },
+            { category: "Hardware", question: "Komponen yang menyuplai daya listrik ke seluruh bagian komponen komputer adalah...", options: ["Power Supply", "Motherboard", "Hard Disk", "RAM"], correctIndex: 0 },
+            { category: "Hardware", question: "Alat pemindai dokumen atau foto fisik menjadi file digital di komputer dinamakan...", options: ["Scanner", "Printer", "Plotter", "Webcam"], correctIndex: 0 },
+            { category: "Hardware", question: "Perangkat keluaran yang digunakan untuk mengeluarkan suara keras dari komputer yaitu...", options: ["Speaker", "Microphone", "Mouse", "Keyboard"], correctIndex: 0 },
+            { category: "Hardware", question: "Alat masukan suara untuk merekam vokal atau berbicara saat panggilan online adalah...", options: ["Microphone", "Speaker", "Proyektor", "Printer"], correctIndex: 0 },
+            { category: "Hardware", question: "Kamera kecil di atas laptop/komputer untuk mengambil video siaran langsung disebut...", options: ["Webcam", "Scanner", "Monitor", "Joystick"], correctIndex: 0 },
+            { category: "Hardware", question: "Perangkat masukan khusus yang sering digunakan untuk mengontrol permainan game adalah...", options: ["Joystick / Gamepad", "Printer", "Scanner", "Proyektor"], correctIndex: 0 },
+            { category: "Hardware", question: "Perangkat keluaran yang memancarkan tampilan layar komputer ke dinding atau layar lebar adalah...", options: ["Proyektor", "Monitor", "Printer 3D", "Plotter"], correctIndex: 0 },
+            { category: "Hardware", question: "Media penyimpanan portabel yang berukuran kecil dan dapat dicolokkan ke port USB adalah...", options: ["Flashdisk", "Hard Disk Internal", "Motherboard", "RAM"], correctIndex: 0 },
+            { category: "Hardware", question: "Perangkat cetak canggih yang dapat mencetak benda padat tiga dimensi adalah...", options: ["Printer 3D", "Printer Thermal", "Scanner 3D", "Plotter"], correctIndex: 0 },
+            { category: "Hardware", question: "Teknologi penangkap gerakan tubuh manusia untuk dimasukkan ke komputer disebut...", options: ["Motion Capture (Mocap)", "Barcode Scanner", "Touchpad", "Webcam"], correctIndex: 0 },
+
+            { category: "Software", question: "Program dasar yang mengelola seluruh sumber daya dan pengoperasian komputer adalah...", options: ["Sistem Operasi (OS)", "Aplikasi Game", "Antivirus", "Web Browser"], correctIndex: 0 },
+            { category: "Software", question: "Contoh Sistem Operasi yang paling banyak digunakan di laptop dan PC adalah...", options: ["Microsoft Windows", "Microsoft Word", "Google Chrome", "Adobe Photoshop"], correctIndex: 0 },
+            { category: "Software", question: "Sistem operasi buatan Apple yang digunakan khusus pada komputer Mac dinamakan...", options: ["macOS", "Windows", "Android", "Linux"], correctIndex: 0 },
+            { category: "Software", question: "Sistem operasi open-source yang dapat dimodifikasi dan digunakan secara gratis adalah...", options: ["Linux", "Windows 11", "macOS", "iOS"], correctIndex: 0 },
+            { category: "Software", question: "Aplikasi pengolah kata buatan Microsoft yang biasa untuk mengetik surat atau tugas adalah...", options: ["Microsoft Word", "Microsoft Excel", "Microsoft Powerpoint", "Paint"], correctIndex: 0 },
+            { category: "Software", question: "Aplikasi yang digunakan untuk mengolah angka, tabel, dan rumus matematika adalah...", options: ["Microsoft Excel", "Microsoft Word", "Notepad", "CorelDRAW"], correctIndex: 0 },
+            { category: "Software", question: "Program yang digunakan untuk membuat presentasi slide interaktif dinamakan...", options: ["Microsoft PowerPoint", "Microsoft Excel", "WordPad", "Google Maps"], correctIndex: 0 },
+            { category: "Software", question: "Aplikasi peramban web (web browser) buatan Google untuk menjelajah internet adalah...", options: ["Google Chrome", "Mozilla Firefox", "Microsoft Edge", "Safari"], correctIndex: 0 },
+            { category: "Software", question: "Perangkat lunak yang bertugas melindungi komputer dari serangan program berbahaya atau virus yaitu...", options: ["Antivirus", "Aplikasi Edit Video", "Sistem Operasi", "Driver"], correctIndex: 0 },
+            { category: "Software", question: "Aplikasi sederhana bawaan Windows yang berfungsi untuk menggambar visual adalah...", options: ["Paint", "Photoshop", "Excel", "Calculator"], correctIndex: 0 },
+            { category: "Software", question: "Program aplikasi pemutar musik dan video digital di komputer contohnya adalah...", options: ["VLC Media Player", "Google Chrome", "WinRAR", "Antivirus"], correctIndex: 0 },
+            { category: "Software", question: "Software yang digunakan untuk mengompres atau mengecilkan ukuran folder/file adalah...", options: ["WinRAR / Zip", "Word", "Excel", "Photoshop"], correctIndex: 0 },
+
+            { category: "Brainware", question: "Manusia yang mengoperasikan, mengelola, dan memanfaatkan sistem komputer disebut...", options: ["Brainware", "Software", "Hardware", "Groupware"], correctIndex: 0 },
+            { category: "Brainware", question: "Orang yang ahli menulis kode instruksi untuk membuat program komputer dinamakan...", options: ["Programmer", "Operator", "Teknisi", "System Analyst"], correctIndex: 0 },
+            { category: "Brainware", question: "Pengguna biasa yang bertugas memasukkan data dan mengoperasikan komputer sehari-hari yaitu...", options: ["Operator", "Programmer", "Teknisi", "Administrator"], correctIndex: 0 },
+            { category: "Brainware", question: "Orang yang bertugas merancang dan menganalisis kebutuhan sistem komputer perusahaan adalah...", options: ["System Analyst", "Operator", "Gamer", "Ketikers"], correctIndex: 0 },
+            { category: "Brainware", question: "Spesialis yang bertugas memperbaiki kerusakan perangkat keras atau hardware komputer yaitu...", options: ["Teknisi Komputer", "Programmer", "Desainer Grafis", "Web Developer"], correctIndex: 0 },
+            { category: "Brainware", question: "Orang yang bertanggung jawab menjaga dan mengelola keamanan jaringan komputer dinamakan...", options: ["Network Administrator", "Data Entry", "Content Creator", "Operator"], correctIndex: 0 },
+
+            { category: "Konsep Sistem", question: "Tiga elemen dasar utama yang membentuk sistem komputer agar dapat berfungsi adalah...", options: ["Hardware, Software, Brainware", "CPU, Monitor, Printer", "Input, Output, Process", "Windows, Office, Antivirus"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "Urutan skema alur kerja sistem komputer yang benar dari awal hingga akhir adalah...", options: ["Input -> Proses -> Output", "Output -> Proses -> Input", "Proses -> Input -> Output", "Input -> Output -> Simpan"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "Data mentah yang telah diproses dan diolah oleh komputer akan menghasilkan...", options: ["Informasi", "Hardware", "Virus", "Software"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "Sistem bilangan digital yang hanya menggunakan simbol angka 0 dan 1 disebut...", options: ["Sistem Biner", "Sistem Desimal", "Sistem Heksadesimal", "Sistem Oktaf"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "Satuan terkecil dari data digital pada sistem komputer dinamakan...", options: ["Bit", "Byte", "Kilobyte", "Megabyte"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "1 Byte dalam data digital terdiri dari kombinasi sebanyak...", options: ["8 Bit", "2 Bit", "4 Bit", "16 Bit"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "Perangkat keras masukan yang terdapat pada laptop sebagai pengganti fungsi mouse adalah...", options: ["Touchpad", "Trackball", "Stylus", "Keypad"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "Kabel penghubung antara komputer dengan monitor untuk mentransfer video jernih HD adalah...", options: ["Kabel HDMI", "Kabel Power", "Kabel Audio", "Kabel LAN"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "Slot tempat memasangkan memori RAM pada motherboard dinamakan...", options: ["Slot RAM / DIMM", "Socket CPU", "Port USB", "SATA Port"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "Sistem penyimpanan data berbasis jaringan internet online tanpa fisik media disebut...", options: ["Cloud Storage", "Flashdisk", "Hard Disk Internal", "Floppy Disk"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "Proses menghidupkan atau memulai kembali komputer dari awal dinamakan...", options: ["Booting", "Loading", "Downloading", "Installing"], correctIndex: 0 },
+            { category: "Konsep Sistem", question: "Tindakan mematikan komputer sesuai dengan prosedur sistem operasi yang benar disebut...", options: ["Shutdown", "Restart", "Sleep", "Hibernate"], correctIndex: 0 }
+        ];
+
+        // Shuffle Utility Function (Fisher-Yates)
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Web Audio API Synthesizer
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'boost') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'coin') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523, now);
+                osc.frequency.setValueAtTime(659, now + 0.08);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'crash') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.exponentialRampToValueAtTime(30, now + 0.4);
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'correct') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523, now);
+                osc.frequency.setValueAtTime(659, now + 0.1);
+                osc.frequency.setValueAtTime(783, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.setValueAtTime(140, now + 0.15);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+        }
+
+        // Game State Variables
+        let canvas, ctx;
+        let gameQuestions = [];
+        let gameState = {
+            score: 0,
+            health: 3,
+            checkpointIndex: 0,
+            correctAnswers: 0,
+            speed: 6,
+            baseSpeed: 6,
+            maxSpeed: 14,
+            distance: 0,
+            checkpointDistance: 2400, // LINTASAN BALAP PANJANG (~35-45 detik balapan penuh)
+            isNitro: false,
+            isPaused: false,
+            isPlaying: false
+        };
+
+        let player = {
+            x: 0,
+            y: 0,
+            width: 48,
+            height: 86,
+            targetX: 0
+        };
+
+        let road = {
+            x: 0,
+            width: 270,
+            stripeOffset: 0
+        };
+
+        let obstacles = [];
+        let items = [];
+
+        function prepareRandomQuestions() {
+            // Pengacakan urutan 50 Soal
+            gameQuestions = shuffleArray(rawQuestionsData).map(q => {
+                const originalCorrectText = q.options[q.correctIndex];
+                // Pengacakan Opsi Jawaban
+                const shuffledOptions = shuffleArray(q.options);
+                const newCorrectIndex = shuffledOptions.indexOf(originalCorrectText);
+                return {
+                    category: q.category,
+                    question: q.question,
+                    options: shuffledOptions,
+                    correctIndex: newCorrectIndex
+                };
+            });
+        }
+
+        function initAndStartGame() {
+            prepareRandomQuestions();
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('gameplayScreen').classList.remove('hidden');
+
+            canvas = document.getElementById('raceCanvas');
+            ctx = canvas.getContext('2d');
+
+            const containerWidth = canvas.parentElement.clientWidth;
+            canvas.width = Math.min(containerWidth, 500);
+            canvas.height = 420;
+
+            road.width = canvas.width * 0.65;
+            road.x = (canvas.width - road.width) / 2;
+
+            player.x = canvas.width / 2 - player.width / 2;
+            player.y = canvas.height - player.height - 25;
+            player.targetX = player.x;
+
+            gameState = {
+                score: 0,
+                health: 3,
+                checkpointIndex: 0,
+                correctAnswers: 0,
+                speed: 6,
+                baseSpeed: 6,
+                maxSpeed: 14,
+                distance: 0,
+                checkpointDistance: 2400, // DURASI BALAP LAMA
+                isNitro: false,
+                isPaused: false,
+                isPlaying: true
+            };
+
+            obstacles = [];
+            items = [];
+            spawnObstacle();
+            spawnObstacle();
+            spawnItem();
+
+            updateHUD();
+            setupControls();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop() {
+            if (!gameState.isPlaying) return;
+
+            if (!gameState.isPaused) {
+                updateGameLogic();
+            }
+
+            renderGameGraphics();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateGameLogic() {
+            let currentSpeed = gameState.isNitro ? gameState.maxSpeed : gameState.speed;
+            gameState.distance += currentSpeed;
+
+            road.stripeOffset = (road.stripeOffset + currentSpeed * 1.5) % 60;
+
+            player.x += (player.targetX - player.x) * 0.25;
+
+            const minX = road.x + 10;
+            const maxX = road.x + road.width - player.width - 10;
+            if (player.x < minX) player.x = minX;
+            if (player.x > maxX) player.x = maxX;
+
+            // Update Obstacles
+            obstacles.forEach((obs, index) => {
+                obs.y += currentSpeed - obs.speed;
+
+                if (checkCollision(player, obs)) {
+                    playSound('crash');
+                    gameState.health--;
+                    gameState.score = Math.max(0, gameState.score - 50);
+                    obstacles.splice(index, 1);
+                    spawnObstacle();
+                    updateHUD();
+
+                    if (gameState.health <= 0) {
+                        finishGame();
+                    }
+                }
+
+                if (obs.y > canvas.height + 100) {
+                    obstacles.splice(index, 1);
+                    spawnObstacle();
+                    gameState.score += 20;
+                    updateHUD();
+                }
+            });
+
+            // Update Items (Koin / Boost)
+            items.forEach((item, index) => {
+                item.y += currentSpeed;
+
+                if (checkCollision(player, item)) {
+                    if (item.type === 'boost') {
+                        playSound('boost');
+                        gameState.score += 50;
+                        gameState.isNitro = true;
+                        setTimeout(() => { gameState.isNitro = false; }, 2500);
+                    } else {
+                        playSound('coin');
+                        gameState.score += 75;
+                    }
+                    items.splice(index, 1);
+                    spawnItem();
+                    updateHUD();
+                }
+
+                if (item.y > canvas.height + 100) {
+                    items.splice(index, 1);
+                    spawnItem();
+                }
+            });
+
+            // Check Checkpoint Pit Stop Kuis (Durasi Balap Panjang)
+            if (gameState.distance >= gameState.checkpointDistance) {
+                gameState.distance = 0;
+                triggerPitStopQuiz();
+            }
+        }
+
+        function spawnObstacle() {
+            const laneWidth = road.width / 3;
+            const lane = Math.floor(Math.random() * 3);
+            const obstacleX = road.x + lane * laneWidth + (laneWidth - 42) / 2;
+            const randType = Math.random();
+            
+            let obsType = 'car';
+            let obsColor = '#ef4444';
+            if (randType < 0.35) {
+                obsType = 'oil';
+            } else if (randType < 0.65) {
+                obsType = 'cone';
+            } else {
+                obsType = 'car';
+                obsColor = Math.random() > 0.5 ? '#f59e0b' : '#3b82f6';
+            }
+
+            obstacles.push({
+                x: obstacleX,
+                y: -150 - Math.random() * 300,
+                width: 42,
+                height: obsType === 'car' ? 75 : 40,
+                speed: obsType === 'car' ? (Math.random() * 2 + 1) : 0,
+                color: obsColor,
+                type: obsType
+            });
+        }
+
+        function spawnItem() {
+            const laneWidth = road.width / 3;
+            const lane = Math.floor(Math.random() * 3);
+            const itemX = road.x + lane * laneWidth + (laneWidth - 30) / 2;
+
+            items.push({
+                x: itemX,
+                y: -300 - Math.random() * 400,
+                width: 30,
+                height: 30,
+                type: Math.random() > 0.5 ? 'boost' : 'coin'
+            });
+        }
+
+        function checkCollision(a, b) {
+            return a.x < b.x + b.width &&
+                   a.x + a.width > b.x &&
+                   a.y < b.y + b.height &&
+                   a.y + a.height > b.y;
+        }
+
+        function renderGameGraphics() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Background Grass Scenery
+            ctx.fillStyle = '#064e3b';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Animated Scenery Trees
+            ctx.fillStyle = '#047857';
+            for (let y = -60 + (road.stripeOffset % 70); y < canvas.height + 60; y += 70) {
+                ctx.beginPath();
+                ctx.arc(25, y, 18, 0, Math.PI * 2);
+                ctx.arc(canvas.width - 25, y, 18, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Road Asphalt
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(road.x, 0, road.width, canvas.height);
+
+            // Red & White Kerbs
+            const kerbHeight = 25;
+            for (let y = -kerbHeight + (road.stripeOffset % (kerbHeight * 2)); y < canvas.height + kerbHeight; y += kerbHeight * 2) {
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(road.x - 8, y, 8, kerbHeight);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(road.x - 8, y + kerbHeight, 8, kerbHeight);
+
+                ctx.fillStyle = '#ef4444';
+                ctx.fillRect(road.x + road.width, y, 8, kerbHeight);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(road.x + road.width, y + kerbHeight, 8, kerbHeight);
+            }
+
+            // Lane Lines
+            const laneWidth = road.width / 3;
+            ctx.strokeStyle = '#f8fafc';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([25, 25]);
+            ctx.lineDashOffset = -road.stripeOffset;
+
+            ctx.beginPath();
+            ctx.moveTo(road.x + laneWidth, 0);
+            ctx.lineTo(road.x + laneWidth, canvas.height);
+            ctx.moveTo(road.x + laneWidth * 2, 0);
+            ctx.lineTo(road.x + laneWidth * 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Render Items
+            items.forEach(item => {
+                if (item.type === 'boost') {
+                    ctx.fillStyle = '#10b981';
+                    ctx.beginPath();
+                    ctx.arc(item.x + 15, item.y + 15, 15, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '14px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('⚡', item.x + 15, item.y + 20);
+                } else {
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.beginPath();
+                    ctx.arc(item.x + 15, item.y + 15, 14, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('🪙', item.x + 15, item.y + 19);
+                }
+            });
+
+            // Render Obstacles
+            obstacles.forEach(obs => {
+                if (obs.type === 'oil') {
+                    ctx.fillStyle = '#0f172a';
+                    ctx.beginPath();
+                    ctx.ellipse(obs.x + obs.width / 2, obs.y + obs.height / 2, 20, 14, Math.PI / 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#334155';
+                    ctx.fillText('🛢️', obs.x + obs.width / 2 - 8, obs.y + obs.height / 2 + 5);
+                } else if (obs.type === 'cone') {
+                    ctx.fillStyle = '#f97316';
+                    ctx.beginPath();
+                    ctx.moveTo(obs.x + obs.width / 2, obs.y);
+                    ctx.lineTo(obs.x + obs.width, obs.y + obs.height);
+                    ctx.lineTo(obs.x, obs.y + obs.height);
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    drawEnemyCar(obs.x, obs.y, obs.width, obs.height, obs.color);
+                }
+            });
+
+            // Player Car
+            drawPlayerCar(player.x, player.y, player.width, player.height);
+
+            // Progress HUD Bar on Canvas
+            const progress = Math.min(1, gameState.distance / gameState.checkpointDistance);
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+            ctx.fillRect(15, 15, 180, 26);
+            ctx.strokeStyle = '#334155';
+            ctx.strokeRect(15, 15, 180, 26);
+
+            ctx.fillStyle = '#06b6d4';
+            ctx.fillRect(18, 18, 174 * progress, 20);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '9px "Press Start 2P"';
+            ctx.textAlign = 'center';
+            ctx.fillText(`MENUJU PIT STOP: ${Math.floor(progress * 100)}%`, 105, 31);
+        }
+
+        function drawPlayerCar(x, y, w, h) {
+            ctx.save();
+
+            // Fire Exhaust when Nitro
+            if (gameState.isNitro) {
+                ctx.fillStyle = '#f59e0b';
+                ctx.beginPath();
+                ctx.moveTo(x + 10, y + h);
+                ctx.lineTo(x + 18, y + h + 25 + Math.random() * 10);
+                ctx.lineTo(x + 24, y + h);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(x + w - 24, y + h);
+                ctx.lineTo(x + w - 18, y + h + 25 + Math.random() * 10);
+                ctx.lineTo(x + w - 10, y + h);
+                ctx.fill();
+            }
+
+            // Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.fillRect(x + 4, y + 6, w, h);
+
+            // Tires
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(x - 4, y + 10, 7, 20);
+            ctx.fillRect(x + w - 3, y + 10, 7, 20);
+            ctx.fillRect(x - 4, y + h - 28, 7, 20);
+            ctx.fillRect(x + w - 3, y + h - 28, 7, 20);
+
+            // Car Body
+            const gradient = ctx.createLinearGradient(x, y, x + w, y);
+            gradient.addColorStop(0, '#0284c7');
+            gradient.addColorStop(0.5, '#38bdf8');
+            gradient.addColorStop(1, '#0369a1');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.roundRect(x, y, w, h, 14);
+            ctx.fill();
+
+            // Windshield
+            ctx.fillStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.roundRect(x + 6, y + 20, w - 12, 18, 5);
+            ctx.fill();
+
+            // Number 05
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(x + w / 2, y + 12, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 9px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText('50', x + w / 2, y + 15);
+
+            // Headlights
+            ctx.fillStyle = '#fef08a';
+            ctx.fillRect(x + 5, y, 9, 4);
+            ctx.fillRect(x + w - 14, y, 9, 4);
+
+            // Rear Spoiler
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(x + 3, y + h - 6, w - 6, 6);
+
+            ctx.restore();
+        }
+
+        function drawEnemyCar(x, y, w, h, color) {
+            ctx.save();
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(x - 3, y + 8, 6, 16);
+            ctx.fillRect(x + w - 3, y + 8, 6, 16);
+            ctx.fillRect(x - 3, y + h - 22, 6, 16);
+            ctx.fillRect(x + w - 3, y + h - 22, 6, 16);
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.roundRect(x, y, w, h, 10);
+            ctx.fill();
+
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(x + 6, y + 18, w - 12, 14);
+
+            ctx.fillStyle = '#dc2626';
+            ctx.fillRect(x + 4, y + h - 4, 8, 4);
+            ctx.fillRect(x + w - 12, y + h - 4, 8, 4);
+            ctx.restore();
+        }
+
+        function setupControls() {
+            window.addEventListener('keydown', (e) => {
+                if (!gameState.isPlaying || gameState.isPaused) return;
+                if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') player.targetX -= 50;
+                if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') player.targetX += 50;
+                if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') gameState.isNitro = true;
+                if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') gameState.speed = 3;
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W' || e.key === ' ') gameState.isNitro = false;
+                if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') gameState.speed = gameState.baseSpeed;
+            });
+
+            const btnLeft = document.getElementById('btnLeft');
+            const btnRight = document.getElementById('btnRight');
+            const btnBrake = document.getElementById('btnBrake');
+            const btnNitro = document.getElementById('btnNitro');
+
+            btnLeft.onclick = () => { player.targetX -= 50; };
+            btnRight.onclick = () => { player.targetX += 50; };
+
+            btnNitro.onmousedown = btnNitro.ontouchstart = (e) => { e.preventDefault(); gameState.isNitro = true; };
+            btnNitro.onmouseup = btnNitro.ontouchend = () => { gameState.isNitro = false; };
+
+            btnBrake.onmousedown = btnBrake.ontouchstart = (e) => { e.preventDefault(); gameState.speed = 3; };
+            btnBrake.onmouseup = btnBrake.ontouchend = () => { gameState.speed = gameState.baseSpeed; };
+        }
+
+        function triggerPitStopQuiz() {
+            gameState.isPaused = true;
+            const q = gameQuestions[gameState.checkpointIndex % gameQuestions.length];
+
+            document.getElementById('quizCategory').innerText = q.category;
+            document.getElementById('quizQuestion').innerText = q.question;
+
+            let html = '';
+            q.options.forEach((opt, idx) => {
+                html += `
+                    <button onclick="submitAnswer(${idx}, ${q.correctIndex})" class="w-full text-left bg-slate-800 hover:bg-cyan-600 hover:border-cyan-400 border border-slate-700 text-slate-100 p-3.5 rounded-2xl transition font-semibold text-xs sm:text-sm flex items-center justify-between group">
+                        <span>${opt}</span>
+                        <span class="w-6 h-6 rounded-lg bg-slate-700 group-hover:bg-cyan-500 flex items-center justify-center text-[10px] font-bold text-white transition">${String.fromCharCode(65 + idx)}</span>
+                    </button>
+                `;
+            });
+
+            document.getElementById('quizOptions').innerHTML = html;
+            document.getElementById('pitStopModal').classList.remove('hidden');
+            document.getElementById('pitStopModal').classList.add('flex');
+        }
+
+        function submitAnswer(selected, correct) {
+            document.getElementById('pitStopModal').classList.remove('flex');
+            document.getElementById('pitStopModal').classList.add('hidden');
+
+            if (selected === correct) {
+                playSound('correct');
+                gameState.score += 300;
+                gameState.correctAnswers++;
+                gameState.isNitro = true;
+                setTimeout(() => { gameState.isNitro = false; }, 3000);
+            } else {
+                playSound('wrong');
+                gameState.health--;
+                gameState.score = Math.max(0, gameState.score - 50);
+            }
+
+            gameState.checkpointIndex++;
+            gameState.isPaused = false;
+            updateHUD();
+
+            if (gameState.checkpointIndex >= 50 || gameState.health <= 0) {
+                finishGame();
+            }
+        }
+
+        function updateHUD() {
+            document.getElementById('scoreDisplay').innerText = gameState.score;
+            document.getElementById('checkpointDisplay').innerText = `${gameState.checkpointIndex} / 50`;
+
+            let hearts = '';
+            for (let i = 0; i < 3; i++) {
+                hearts += i < gameState.health ? '❤️' : '🖤';
+            }
+            document.getElementById('healthDisplay').innerText = hearts;
+        }
+
+        function finishGame() {
+            gameState.isPlaying = false;
+            document.getElementById('gameplayScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            document.getElementById('finalScore').innerText = gameState.score;
+            document.getElementById('finalCorrect').innerText = `${gameState.correctAnswers} / 50`;
+
+            if (gameState.health <= 0) {
+                document.getElementById('finishIcon').innerText = '💥';
+                document.getElementById('finishTitle').innerText = 'GAME OVER!';
+                document.getElementById('finishDesc').innerText = 'Nyawamu habis karena menabrak rintangan atau salah menjawab kuis. Ayo coba lagi!';
+            } else if (gameState.correctAnswers >= 40) {
+                document.getElementById('finishIcon').innerText = '🏆';
+                document.getElementById('finishTitle').innerText = 'JUARA SEJATI! 🎉';
+                document.getElementById('finishDesc').innerText = 'Luar biasa! Kamu menguasai 50 soal Sistem Komputer dengan sangat sempurna!';
+            } else {
+                document.getElementById('finishIcon').innerText = '🏁';
+                document.getElementById('finishTitle').innerText = 'BALAPAN SELESAI!';
+                document.getElementById('finishDesc').innerText = 'Kerja bagus! Pelajari lagi materi Hardware, Software, dan Brainware untuk skor lebih tinggi.';
+            }
+        }
+
+        function restartGame() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
